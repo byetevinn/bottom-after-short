@@ -1,9 +1,13 @@
 import pandas as pd
-from datetime import datetime
 
+
+# Alterar o nome do arquivo, para o nome do arquivo que será lido
+
+# Nome do arquivo
+file_name = "P01_12ARE-GBD 08.txt"
 
 # Caminho do arquivo
-file_path = "./data/P01_12ARE-GBD 08.txt"
+file_path = f"./data/{file_name}"
 
 
 split_lines = []
@@ -40,7 +44,6 @@ df = pd.DataFrame(split_lines)
 
 # Percorrer cada coluna do DataFrame usando o nome do cabeçalho
 for column in df.columns:
-    print("Inicio -----------------------")
 
     # Acessar os valores da coluna usando o nome do cabeçalho
     values = df[column]
@@ -58,6 +61,7 @@ for column in df.columns:
 
         # Verificar se o index é maior que 0 e o valor é uma string
         if index > 0 and isinstance(value, str):
+
             # Dividir o valor por vírgula e armazenar em uma variável
             splitted_value = value.split(",")
 
@@ -67,6 +71,7 @@ for column in df.columns:
 
             # Verificar se o tempo é maior que 1
             if time > 1:
+
                 # Verificar se o valor anterior é menor que o valor atual
                 if (
                     previous_point is not None
@@ -80,15 +85,11 @@ for column in df.columns:
 
                     # Verificar se a contagem de pontos de inflação é igual a 2
                     if inflation_point == 2:
-                        print("previous_point", previous_point)
-                        print("line_score", line_score)
-                        print("time", time)
-                        print("-----------------------")
 
                         df.loc[1:, column] = previous_point
 
                         # Limpar a coluna (exceto as linhas 0 à 3)
-                        df[column].iloc[2:] = None
+                        df.loc[2:, column] = None
                         break
 
                 else:
@@ -98,11 +99,9 @@ for column in df.columns:
                     previous_point = line_score
 
 
-# Obter a data e hora atuais
-data_hora_atual = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
 # Caminho do arquivo Excel de saída
-excel_file_path = f"./data/{data_hora_atual}.xlsx"
+excel_file_path = f"./output/{file_name}.xlsx"
+
 
 # Salvar o DataFrame em um arquivo Excel
 df.to_excel(excel_file_path, index=False)
