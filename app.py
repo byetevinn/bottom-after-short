@@ -61,6 +61,9 @@ for file_name in file_names:
         # Armazenar o último valor percorrido da linha
         previous_point = None
 
+        # Menor valor encontrado na linha
+        lower_value = None
+
         # Iterar sobre cada valor da coluna
         for index, value in values.items():
             # Verificar se o index é maior que 0 e o valor é uma string
@@ -72,8 +75,8 @@ for file_name in file_names:
                 time = float(splitted_value[0])
                 line_score = float(splitted_value[1])
 
-                # Verificar se o tempo é maior que 1
-                if time > 1:
+                # Verificar se o tempo é maior que 0.9
+                if time > 0.9:
                     # Verificar se o valor anterior é menor que o valor atual
                     if (
                         previous_point is not None
@@ -83,18 +86,29 @@ for file_name in file_names:
                         inflation_point += 1
                         going_down = False
 
-                        # Verificar se a contagem de pontos de inflação é igual a 2
-                        if inflation_point == 2:
-                            # Substituir os valores da coluna a partir da linha 1 pelo valor anterior
-                            df.loc[1:, column] = previous_point
-                            # Limpar a coluna (exceto as linhas 0 à 3)
-                            df.loc[2:, column] = None
-                            break
+                        # Verificar se a contagem de pontos de inflação é igual a 1
+                        if inflation_point == 1:
+                            # Substituir o valor na linha 1
+                            df.loc[1, column] = previous_point
+
+                        if inflation_point > 1:
+
+                            if lower_value is None:
+                                lower_value = previous_point
+                            elif previous_point < lower_value:
+                                lower_value = previous_point
+
+                            # Substituir o valor na linha 2
+                            df.loc[2, column] = lower_value
+
                     else:
                         if previous_point is not None and previous_point > line_score:
                             going_down = True
 
                         previous_point = line_score
+
+        # Limpar a coluna (exceto as linhas 1 à 3)
+        df.loc[3:, column] = None
 
     # Caminho completo do arquivo de saída
     output_file_path = os.path.join(output_folder, f"{file_name}.xlsx")
